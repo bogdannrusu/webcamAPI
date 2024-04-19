@@ -1,0 +1,4 @@
+#1 pip install opencv-python
+#2 pip install Flask
+#3 pyton.exe pip install --upgrade pip
+#4 Python interpretator version: 3.11
