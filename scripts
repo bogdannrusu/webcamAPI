@@ -2,3 +2,80 @@
 #2 pip install Flask
 #3 pyton.exe pip install --upgrade pip
 #4 Python interpretator version: 3.11
+
+Test Script:
+import os
+import cv2
+import logging
+import threading
+import time
+from flask import Flask, render_template, Response
+
+app = Flask(__name__, template_folder='src')
+
+# Configure logging
+app.logger.setLevel(logging.DEBUG)  # Set logging level
+
+# Specify the directories where you want to save captured images
+SCREENSHOT_DIR = 'captured_screenshots'
+WEBCAM_DIR = 'captured_webcam'
+
+# Create the directories if they don't exist
+for directory in [SCREENSHOT_DIR, WEBCAM_DIR]:
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        app.logger.info(f"Created directory: {directory}")
+
+screenshot_camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # Use DirectShow backend initially for screenshots
+webcam_camera = cv2.VideoCapture(0)  # Use default backend for live webcam feed
+
+
+def capture_and_save_screenshot():
+    while True:
+        success, frame = screenshot_camera.read()  # Capture frame from camera
+        if success:
+            # Generate a unique filename
+            filename = os.path.join(SCREENSHOT_DIR, f'screenshot_{time.strftime("%Y%m%d_%H%M%S")}.jpg')
+            # Save the image to disk
+            cv2.imwrite(filename, frame)
+            app.logger.info(f"Screenshot saved at: {filename}")
+        else:
+            app.logger.error("Failed to capture frame for screenshot")
+        # Wait for 3 seconds before capturing the next screenshot
+        time.sleep(3)
+
+
+def gen_frames():
+    while True:
+        success, frame = webcam_camera.read()  # read the camera frame for live webcam feed
+        if not success:
+            app.logger.error("Failed to read frame from webcam")
+            break
+        else:
+            ret, buffer = cv2.imencode('.jpg', frame)
+            if not ret:
+                app.logger.error("Failed to encode frame")
+                break
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+
+
+# Start a separate thread for capturing and saving screenshots
+screenshot_thread = threading.Thread(target=capture_and_save_screenshot)
+screenshot_thread.daemon = True
+screenshot_thread.start()
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
