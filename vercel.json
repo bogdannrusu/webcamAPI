@@ -1,27 +1,13 @@
 {
-"builds": [
-  {
-    "src": "vercel_app/main.py",
-    "use": "@vercel/python",
-    "config":
+  "version": 2,
+  "builds": [
+    { "src":  "main.py", "use": "@vercel/python" }
+  ],
+  "routes": [
     {
-      "maxLambdaSize": "15mb",
-      "runtime": "python3.8"
+      "src": "/(.*)",
+      "dest": "main.py"
     }
-  }
-],
-"routes": [
-  {
-    "src": "/(.*)",
-    "dest": "vercel_app/main.py"
-  }
-],
-
-   "rewrites":
-   [{
-     "source": "/(.*)",
-     "destination": "./main.py"
-   }]
+  ]
 
 }
-
