@@ -3,7 +3,11 @@
   {
     "src": "vercel_app/main.py",
     "use": "@vercel/python",
-    "config": { "maxLambdaSize": "15mb", "runtime": "python3.8" }
+    "config":
+    {
+      "maxLambdaSize": "15mb",
+      "runtime": "python3.8"
+    }
   }
 ],
 "routes": [
@@ -11,6 +15,13 @@
     "src": "/(.*)",
     "dest": "vercel_app/main.py"
   }
-]
+],
+
+   "rewrites":
+   [{
+     "source": "/(.*)",
+     "destination": "./main.py"
+   }]
+
 }
 
