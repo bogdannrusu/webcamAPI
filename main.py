@@ -4,10 +4,9 @@ from flask import Flask, render_template, Response
 
 app = Flask(__name__, template_folder='src')
 
-# Configure logging
-app.logger.setLevel(logging.DEBUG)  # Set logging level
 
-# Initialize the webcam capture object
+app.logger.setLevel(logging.DEBUG)
+
 webcam_camera = cv2.VideoCapture(0)
 
 
