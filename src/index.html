@@ -7,6 +7,20 @@
 </head>
 <body>
     <h1>Live Video Stream</h1>
-    <img id="video_feed" src="/video_feed" alt="Video Feed" />
+    <video id="video_feed" autoplay playsinline></video>
+    <script>
+        const video = document.getElementById('video_feed');
+
+        async function startVideoStream() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (error) {
+                console.error('Error accessing webcam:', error);
+            }
+        }
+
+        startVideoStream();
+    </script>
 </body>
 </html>
